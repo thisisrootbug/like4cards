@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="pos" xml:space="preserve">
+    
+
+    <t t-name="Like4cardsStatusWidget">
+        <div class="oe_status">
+            <span class="like4cards-icon" style="background-color: white;" >
+                <img src="/like4cards/static/description/like4cards-logo.svg" style="width: 70px;" />
+            </span>
+        </div>
+    </t>
+
+    
+</templates>

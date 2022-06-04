@@ -1,0 +1,23 @@
+{
+    "name": "Like4Cards API",
+    "version": "1.0",
+    "category": "API",
+    "author": "Hasabalrasool",
+    "website": "https://t.me/r00tbug",
+    "summary": "LikeCard Merchant API for integration account",
+    "support": "r00tbug@yahoo.com",
+    "description": """ For detailed example of API refer https://docs.like4card.com """,
+    "depends": ["base","restful","point_of_sale","pos_order_reprint"],
+    "data": [
+        "data/product_category.xml",
+        "data/like4card.xml",
+        "views/web_assets.xml",
+        "views/res_config_settings.xml",
+        "security/ir.model.access.csv",
+        ],
+    "images": ["static/description/like4cards-logo.svg"],
+    "qweb": ["static/src/xml/pos.xml"],
+    "license": "LGPL-3",
+    "installable": True,
+    "auto_install": False,
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+  <data>
+    <record id="main_category" model="pos.category">
+      <field name="name">Like4Cards</field>
+      <field name="display_name">Like4Cards</field>
+      <field name="sequence">4</field>
+      <field file="like4cards/static/description/like4cards-logo.svg" name="image" type="base64" />
+    </record>
+
+    <record id="main_product" model="product.product">
+      <field name="name">Like4Cards Products</field>
+      <field name="display_name">Like4Cards Products</field>
+      <field name="pos_categ_id" ref="main_category" />
+      <field name="sale_ok" eval="True" />
+    </record>
+
+  </data>
+</odoo>

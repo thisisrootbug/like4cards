@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+   <data>
+	<template id="web_assets" inherit_id="point_of_sale.assets">
+		<xpath expr="." position="inside">
+		  <script type="text/javascript" src="/like4cards/static/src/js/main.js"></script>
+		</xpath>
+	</template>
+  </data>
+</odoo>

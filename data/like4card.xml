@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+  <data>
+    <record id="like4card_record" model="like4card">
+      <field name="name">Like4Cards</field>
+    </record>
+  </data>
+</odoo>
