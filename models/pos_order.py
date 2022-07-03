@@ -17,8 +17,7 @@ class PosOrderLine(models.Model):
             else:
                 product_id = self.env.ref("like4cards.main_product")
                 values["product_id"] = product_id.id
-                _logger.info(values)
                 res = super(PosOrderLine,self).create(values)
-                _logger.info(res)
+                res.state = 'paid'
                 
 

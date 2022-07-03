@@ -102,12 +102,34 @@ odoo.define('like4cards.like4cards_screen', function(require) {
                     var jdata = JSON.parse(data);
                     var cats = [];
                     jdata.data.forEach(cat => { 
-                            cat["id"] = 10000 * parseInt(cat["id"]);
-                            cat["categoryParentId"] = parseInt(cat["categoryParentId"]);
-                            cat["parent_id"] = category.id;
-                            cat["name"] = cat.categoryName;
-                            cat["image_url"] = cat.amazonImage;
-                            cats.push(cat);
+                            if(cat.childs != []){
+                                cat.childs.forEach(subcat => { 
+                                    if(subcat.childs != []){
+                                        subcat.childs.forEach(subsubcat => { 
+                                                subsubcat["id"] = 10000 * parseInt(subsubcat["id"]);
+                                                subsubcat["categoryParentId"] = parseInt(subsubcat["categoryParentId"]);
+                                                subsubcat["parent_id"] = category.id;
+                                                subsubcat["name"] = subsubcat.categoryName;
+                                                subsubcat["image_url"] = subsubcat.amazonImage;
+                                                cats.push(subsubcat);
+                                        });
+                                    }else{
+                                        subcat["id"] = 10000 * parseInt(subcat["id"]);
+                                        subcat["categoryParentId"] = parseInt(subcat["categoryParentId"]);
+                                        subcat["parent_id"] = category.id;
+                                        subcat["name"] = subcat.categoryName;
+                                        subcat["image_url"] = subcat.amazonImage;
+                                        cats.push(subcat);
+                                    }
+                                });
+                            }else{
+                                cat["id"] = 10000 * parseInt(cat["id"]);
+                                cat["categoryParentId"] = parseInt(cat["categoryParentId"]);
+                                cat["parent_id"] = category.id;
+                                cat["name"] = cat.categoryName;
+                                cat["image_url"] = cat.amazonImage;
+                                cats.push(cat);
+                            }
                     });
                     self.pos.db.add_categories(cats);
                     self.set_category(self.pos.db.root_category_id);
