@@ -19,5 +19,16 @@ class PosOrderLine(models.Model):
                 values["product_id"] = product_id.id
                 res = super(PosOrderLine,self).create(values)
                 res.state = 'paid'
+
+class PosOrder(models.Model):
+    _inherit='pos.order'
+
+    @api.model
+    def _process_order(self, pos_order):
+        for line in pos_order['lines']:
+            product_id = self.env['product.product'].search([("id","=",line[2]['product_id'])],limit=1)
+            if not product_id:
+                line[2]['product_id'] = self.env.ref("like4cards.main_product").id
+        return super(PosOrder,self)._process_order(pos_order)
                 
 

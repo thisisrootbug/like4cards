@@ -3,18 +3,13 @@ import ast
 import logging
 import requests
 import time as formal_time
+from datetime import datetime 
 from odoo import http
-from odoo.addons.restful.common import (
-    extract_arguments,
-    invalid_response,
-    valid_response,
-)
 from odoo.http import request
 #from odoo.addons.restful.controller import validate_token
 from Crypto.Cipher import AES
 import base64
 import hashlib
-import math
 import json
 
 _logger = logging.getLogger(__name__)
@@ -22,13 +17,13 @@ _logger = logging.getLogger(__name__)
 
 class Like4Cards(http.Controller):
 
-    try:
-        creds = request.env['res.config.settings'].sudo().get_values()
-    except Exception as ops:
-        _logger.error(ops)
-        # Please, find below your account's credentials for testing:
-	#in testing mode, you can create a test order containing only one of the test cards ( productId = 819 ) 
-        creds = {
+    def __init__(self):
+        try:
+            self.creds = request.env['res.config.settings'].sudo().get_values()
+        except Exception as ops:
+            _logger.error(ops)
+            #in testing mode, you can create a test order containing only one of the test cards ( productId = 819 ) 
+            self.creds = {
                 "like4cards_deviceid": "233cb68f094fade2054f289990049705c571184990a3f410a6c5b8a43c3d229a",
                 "like4cards_email": "ali@saleproo.com",
                 "like4cards_password": "0f4a8609f73739cb4477e8e5a86b2bdd62aee2f4af72f355ab9afd0a1936c03e",
@@ -115,7 +110,7 @@ class Like4Cards(http.Controller):
 
     #@validate_token
     @http.route("/online/orders/details", auth="public", method=["POST"],type='http', csrf=False)
-    def orders_details(self,langId=2, orderId=0,referenceId="", **kw):
+    def online_orders_details(self,langId=2, orderId=0,referenceId="", **kw):
         data = {"deviceId": self.creds["like4cards_deviceid"],
 		"email": self.creds["like4cards_email"],
 		"password": self.creds["like4cards_password"],
@@ -157,7 +152,36 @@ class Like4Cards(http.Controller):
         if(jdata["response"] == 1):
             for i in range(len(jdata["serials"])):
                 jdata["serials"][i]["serialCode"] = self.decryptSerial(jdata["serials"][i]["serialCode"])
-            #request.env['pos.order'].sudo().create({})
+            try:
+                product_id = request.env.ref("like4cards.main_product")
+                data["name"] = data["referenceId"] 
+                data["lines"] = [(0, 0, { "name": data["referenceId"]  ,"product_id": product_id.id , "qty": 1 , "price_unit": kw.get("productPrice", 0),"price_subtotal": kw.get("productPrice", 0), "price_subtotal_incl": kw.get("productPrice", 0) } )]
+                data["amount_tax"] = kw.get("amount_tax", 0)
+                data["amount_total"] = kw.get("productPrice", 0)
+                data["amount_paid"] = kw.get("productPrice", 0)
+                data["amount_return"] = kw.get("amount_return", 0)
+                data["to_invoice"] = False
+                data["is_return_order"] = False
+                data["pos_session_id"] = request.env['pos.session'].sudo().search([('state', '=', 'opened')],limit=1).id
+                data['creation_date'] = datetime.now().isoformat() 
+                data['fiscal_position_id'] = False
+                data['user_id'] = False
+                data['partner_id'] = False
+                data['pricelist_id'] = 1
+                data['priority'] = 'high'
+                data['sequence_number'] = 1
+                data["statement_ids"] = [
+                            [0,0,{
+                                "name": datetime.now().isoformat().split("T")[0],
+                                "statement_id":request.env['pos.session'].sudo().search([('state', '=', 'opened')],limit=1).statement_ids[0].id,
+                                "journal_id": request.env['pos.config'].sudo().search([],limit=1).journal_id.id,
+                                "note": "like4card",
+                                "amount": float(kw.get("productPrice", 0.0))}]
+                            ]
+                pos_order = request.env['pos.order'].sudo()._process_order(data)
+                pos_order.action_pos_order_paid() 
+            except Exception as ops:
+                _logger.error(ops)
         return json.dumps(jdata)
 
 

@@ -17,6 +17,7 @@ odoo.define('like4cards.like4cards_screen', function(require) {
 			if(category.id > 10000){
                 var products = [];
                 session.rpc("/like4cards/get_products",{categoryId: category.id / 10000 }).then(function(data){
+		    console.log("*****Get Products",data);
                     var jdata = JSON.parse(data);
                     if(jdata.response == 1 ){
                     var products = [];
@@ -99,6 +100,7 @@ odoo.define('like4cards.like4cards_screen', function(require) {
             }
 			if(category.name == "Like4Cards"){
                 session.rpc("/like4cards/get_categories",{}).then(function(data){
+                   /* console.log("**** Category",data);
                     var jdata = JSON.parse(data);
                     var cats = [];
                     jdata.data.forEach(cat => { 
@@ -133,7 +135,24 @@ odoo.define('like4cards.like4cards_screen', function(require) {
                     });
                     self.pos.db.add_categories(cats);
                     self.set_category(self.pos.db.root_category_id);
-                    self.renderElement();
+                    self.renderElement();*/
+                    var jdata = JSON.parse(data);
+                    jdata.data.forEach(cat => {
+                        console.log("****************** CAT",cat)
+                        var parent=cat
+                        self.add_like_card_categ(parent)
+
+                        parent.childs.forEach(sub => {
+                            if (sub.childs){
+                                parent=sub;
+                                self.add_like_card_categ(parent)
+
+                            }
+                            
+                        })
+                    })
+                    self.reset_category()
+
                 },function(err,ev){
                     ev.preventDefault();
                     var error_body = 'Your Internet connection is probably down.';
@@ -159,6 +178,37 @@ odoo.define('like4cards.like4cards_screen', function(require) {
             }
             return category.image_url;
         },
+
+        add_like_card_categ:function(cat){
+            var cats = [];
+            var subcategories=[];
+            var subcats=[]
+
+            cat.childs.forEach(subcat => { 
+
+                subcats.push(10000 * parseInt(subcat["id"]))
+                subcategories.push({'id':10000 * parseInt(subcat["id"]),
+                                    'name':subcat['categoryName'],
+                                    'parent_id': [10000 * parseInt(subcat['categoryParentId'])],
+                                    'image_url' : subcat.amazonImage
+                                    })
+
+            })
+
+            cats.push(
+                        {
+                            'child_id':subcats,
+                            'id':10000 * parseInt(cat["id"]),
+                            'name':cat['categoryName'],
+                            'parent_id': [10000 * parseInt(cat['categoryParentId'])],
+                            'image_url' : cat.amazonImage 
+                        }
+                    )
+
+            self.pos.db.add_categories(subcategories);
+            self.pos.db.add_categories(cats);
+
+        }
 
 
 	});
@@ -189,6 +239,7 @@ odoo.define('like4cards.like4cards_screen', function(require) {
                             productId: productId,
                             referenceId: order.name+"-"+1
                         }).then(function(data){
+                            console.log("*****create order",data);
                             var jdata = JSON.parse(data);
                             console.debug(jdata);
                             if(jdata.response == 1){
@@ -232,6 +283,7 @@ odoo.define('like4cards.like4cards_screen', function(require) {
                     return session.rpc("/like4cards/order_details", {
                             referenceId: res.receipt.pos_ref+"-"+1
                         }).then(function(data){
+                            console.log("*** orders details",data);
                             var jdata = JSON.parse(data);
                             if(jdata.response == 1){
                                 line["line_note"] = jdata.serials[0].productName + `
